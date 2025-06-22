@@ -4,7 +4,7 @@ A dynamic, interactive Event Calendar built with React that allows users to mana
 
 ## 🌐 Live Demo
 
-**[View Live Demo](https://demo-link.com)** - Try out the calendar features online!
+**[View Live Demo](https://custom-eventcalendar.netlify.app/)** - Try out the calendar features online!
 
 ## ✨ Features
 
