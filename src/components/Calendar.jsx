@@ -45,7 +45,7 @@ const Calendar = () => {
       const hasRecurringConflicts = checkRecurringEventConflicts(updatedEvent, eventId);
       
       if (conflicts.length > 0 || hasRecurringConflicts) {
-        const conflictMessage = `⚠️ Moving event will create ${conflicts.length} conflict${conflicts.length !== 1 ? 's' : ''}${hasRecurringConflicts && conflicts.length > 0 ? ' and' : ''}${hasRecurringConflicts ? ' recurring conflicts' : ''}`;
+        const conflictMessage = ` Moving event creates ${conflicts.length} conflict${conflicts.length !== 1 ? 's' : ''}${hasRecurringConflicts && conflicts.length > 0 ? ' and' : ''}${hasRecurringConflicts ? ' recurring conflicts' : ''}`;
         toast(conflictMessage, {
           icon: '⚠️',
           style: {
