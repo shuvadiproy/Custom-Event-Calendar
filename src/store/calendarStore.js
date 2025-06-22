@@ -215,11 +215,17 @@ const useCalendarStore = create(
           .filter(event => event.id !== excludeEventId)
           .some(event => {
             const eventStart = parseISO(event.date);
+            
+            // First check if events are on the same date
+            if (!isSameDay(newEventStart, eventStart)) {
+              return false;
+            }
+            
             const eventEnd = event.endTime ? 
               parseISO(`${format(eventStart, 'yyyy-MM-dd')}T${event.endTime}`) :
               addHours(eventStart, 1);
             
-            // Check for overlap
+            // Check for time overlap on the same day
             return (newEventStart < eventEnd && newEventEnd > eventStart);
           });
       },
@@ -236,11 +242,17 @@ const useCalendarStore = create(
           .filter(event => event.id !== excludeEventId)
           .filter(event => {
             const eventStart = parseISO(event.date);
+            
+            // First check if events are on the same date
+            if (!isSameDay(newEventStart, eventStart)) {
+              return false;
+            }
+            
             const eventEnd = event.endTime ? 
               parseISO(`${format(eventStart, 'yyyy-MM-dd')}T${event.endTime}`) :
               addHours(eventStart, 1);
             
-            // Check for overlap
+            // Check for time overlap on the same day
             return (newEventStart < eventEnd && newEventEnd > eventStart);
           })
           .map(event => ({
@@ -278,7 +290,7 @@ const useCalendarStore = create(
         return events
           .filter(event => event.id !== excludeEventId && event.recurrence)
           .some(event => {
-            // Check if the new event conflicts with this recurring event
+            // Check if the new event conflicts with this recurring event on the specific date
             return get().isRecurringEventOnDate(event, newEventStart) && 
                    get().checkTimeConflict(newEventStart, newEventEnd, event);
           });
@@ -299,6 +311,45 @@ const useCalendarStore = create(
         
         // Check for time overlap
         return (newStartTime < existingEndTime && newEndTime > existingStartTime);
+      },
+
+      // Add this debug function to help troubleshoot conflicts
+      debugEventConflicts: (newEvent, excludeEventId = null) => {
+        const { events } = get();
+        const newEventStart = parseISO(newEvent.date);
+        const newEventEnd = newEvent.endTime ? 
+          parseISO(`${format(newEventStart, 'yyyy-MM-dd')}T${newEvent.endTime}`) :
+          addHours(newEventStart, 1);
+        
+        console.log('Debugging conflicts for:', {
+          newEvent,
+          newEventStart: format(newEventStart, 'yyyy-MM-dd HH:mm'),
+          newEventEnd: format(newEventEnd, 'yyyy-MM-dd HH:mm')
+        });
+        
+        const potentialConflicts = events
+          .filter(event => event.id !== excludeEventId)
+          .map(event => {
+            const eventStart = parseISO(event.date);
+            const eventEnd = event.endTime ? 
+              parseISO(`${format(eventStart, 'yyyy-MM-dd')}T${event.endTime}`) :
+              addHours(eventStart, 1);
+            
+            const sameDay = isSameDay(newEventStart, eventStart);
+            const timeConflict = (newEventStart < eventEnd && newEventEnd > eventStart);
+            
+            return {
+              event,
+              eventStart: format(eventStart, 'yyyy-MM-dd HH:mm'),
+              eventEnd: format(eventEnd, 'yyyy-MM-dd HH:mm'),
+              sameDay,
+              timeConflict,
+              hasConflict: sameDay && timeConflict
+            };
+          });
+        
+        console.log('Potential conflicts:', potentialConflicts);
+        return potentialConflicts;
       }
     }),
     {

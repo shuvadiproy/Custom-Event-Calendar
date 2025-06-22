@@ -1,5 +1,5 @@
 import React from 'react';
-import { format, isSameDay, isSameMonth, isToday } from 'date-fns';
+import { format, isSameDay, isSameMonth, isToday, parseISO } from 'date-fns';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -29,9 +29,16 @@ const Calendar = () => {
     // Check for conflicts before updating
     const event = useCalendarStore.getState().events.find(e => e.id === eventId);
     if (event) {
+      // Preserve the original event time when moving to a new date
+      const originalEventDate = parseISO(event.date);
+      const originalTime = format(originalEventDate, 'HH:mm');
+      
+      // Create new date with destination date but original time
+      const newDateTime = parseISO(`${format(destinationDate, 'yyyy-MM-dd')}T${originalTime}`);
+      
       const updatedEvent = {
         ...event,
-        date: format(destinationDate, 'yyyy-MM-dd\'T\'HH:mm')
+        date: format(newDateTime, 'yyyy-MM-dd\'T\'HH:mm')
       };
       
       const conflicts = getConflictingEvents(updatedEvent, eventId);
@@ -50,12 +57,12 @@ const Calendar = () => {
       } else {
         toast.success('Event moved successfully');
       }
-    }
 
-    // Update the event date
-    useCalendarStore.getState().updateEvent(eventId, {
-      date: format(destinationDate, 'yyyy-MM-dd\'T\'HH:mm')
-    });
+      // Update the event date with preserved time
+      useCalendarStore.getState().updateEvent(eventId, {
+        date: format(newDateTime, 'yyyy-MM-dd\'T\'HH:mm')
+      });
+    }
   };
 
   // Check if an event has conflicts
@@ -195,4 +202,4 @@ const Calendar = () => {
   );
 };
 
-export default Calendar;
+export default Calendar; 
