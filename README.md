@@ -25,6 +25,10 @@ A dynamic, interactive Event Calendar built with React that allows users to mana
 - **Headless UI** for modals
 - **Vite** for build tool
 
+## 📱 Compatibility
+
+This project is tested and runs perfectly on Google Chrome for both desktop and mobile devices.
+
 ## 🚀 Getting Started
 
 ```bash
